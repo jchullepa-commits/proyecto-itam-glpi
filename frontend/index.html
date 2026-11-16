@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard ITAM - Cadena de Restaurantes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <h2 class="mb-4">Panel Gerencial de Control de Hardware (GLPI)</h2>
+        
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-white bg-primary text-center p-3">
+                    <h4>Equipos Registrados</h4>
+                    <h1 id="totalEquipos">0</h1>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-success mb-4" onclick="sincronizar()">Simular Alta Masiva de Sede (Generar QRs)</button>
+        
+        <div id="consola" class="alert alert-dark" style="display:none; white-space: pre-line;"></div>
+    </div>
+
+    <script>
+        async function cargarResumen() {
+            try {
+                const res = await fetch('http://localhost:8000/resumen');
+                const data = await res.json();
+                if (data.status === 'success') {
+                    document.getElementById('totalEquipos').innerText = data.total;
+                }
+            } catch (e) {
+                console.log("Esperando conexión con GLPI...");
+            }
+        }
+
+        async function sincronizar() {
+            const consola = document.getElementById('consola');
+            consola.style.display = 'block';
+            consola.innerText = "Sincronizando con API de GLPI y generando QRs...\n";
+            
+            try {
+                const res = await fetch('http://localhost:8000/sincronizar', { method: 'POST' });
+                const data = await res.json();
+                
+                if (data.status === 'success') {
+                    consola.innerText += data.data.join("\n");
+                    cargarResumen();
+                } else {
+                    consola.innerText += "\nError: " + data.message;
+                }
+            } catch (error) {
+                consola.innerText += "\nError de conexión con el Backend.";
+            }
+        }
+
+        // Cargar resumen al iniciar
+        cargarResumen();
+    </script>
+</body>
+</html>

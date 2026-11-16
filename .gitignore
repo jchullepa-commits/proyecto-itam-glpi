@@ -1,0 +1,9 @@
+# Ignorar la carpeta de imágenes QR
+backend/etiquetas_qr/
+
+# Ignorar cachés de Python
+__pycache__/
+*.pyc
+
+# Ignorar archivos de entorno (si los tienes)
+.env

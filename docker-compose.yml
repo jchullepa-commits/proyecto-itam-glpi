@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  mariadb:
+    image: mariadb:10.11
+    container_name: itam_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: glpidb
+      MYSQL_USER: glpiuser
+      MYSQL_PASSWORD: glpipassword
+    volumes:
+      - db_data:/var/lib/mysql
+
+  glpi:
+    image: diouxx/glpi:latest
+    container_name: itam_glpi
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      TIMEZONE: America/Lima
+    depends_on:
+      - mariadb
+
+  backend:
+    build: ./backend
+    container_name: itam_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - glpi
+
+  frontend:
+    build: ./frontend
+    container_name: itam_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
